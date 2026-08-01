@@ -36,6 +36,10 @@ NASDAQ_SYMBOL = "^IXIC"  # NASDAQ Composite index
 # Gold vs USD — try spot symbol first, fall back to COMEX futures if unavailable.
 XAU_SYMBOL_CANDIDATES = ["XAUUSD=X", "GC=F"]
 
+# PAXG (Pax Gold) is a Binance-listed token backed 1:1 by physical gold and
+# tracks spot XAUUSD closely — used as a free realtime proxy via WebSocket.
+GOLD_PROXY_BINANCE_SYMBOL = "PAXGUSDT"
+
 # api.binance.com is geo/network-blocked on some networks; data-api.binance.vision
 # is Binance's public market-data mirror (same REST shape, no auth) and works as a fallback.
 BINANCE_KLINES_URLS = [

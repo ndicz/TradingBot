@@ -25,6 +25,7 @@
     <thead>
       <tr>
         <th>Instrumen</th>
+        <th>Data</th>
         <th>Harga</th>
         <th>Chg %</th>
         <th>Trend</th>
@@ -39,15 +40,17 @@
       </tr>
     </thead>
     <tbody id="table-body">
-      <tr><td colspan="12">Memuat data...</td></tr>
+      <tr><td colspan="13">Memuat data...</td></tr>
     </tbody>
   </table>
   <p class="disclaimer">
     "Sinyal Teknikal" dihasilkan dari indikator (EMA, RSI, MACD, Bollinger Bands) pada timeframe M30.
     "Saran (Tech+News)" menggabungkan sinyal teknikal dengan sentimen berita terbaru (kata kunci
     positif/negatif pada judul berita 1 jam terakhir) — sentimen hanya menggeser sinyal maksimal satu
-    tingkat, tidak bisa membalik BUY kuat jadi SELL. Ini semua heuristik otomatis, bukan nasihat
-    keuangan — gunakan sebagai referensi tambahan, bukan satu-satunya dasar keputusan trading.
+    tingkat, tidak bisa membalik BUY kuat jadi SELL. Kolom "Data" menandai apakah harga streaming
+    realtime lewat Binance WebSocket (🔴 Live) atau hasil polling REST (biasanya beberapa menit delay).
+    Ini semua heuristik otomatis, bukan nasihat keuangan — gunakan sebagai referensi tambahan, bukan
+    satu-satunya dasar keputusan trading.
   </p>
 
   <section id="news-section">

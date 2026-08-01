@@ -42,14 +42,20 @@ function fmtNum(n, digits = 2) {
   return Number(n).toLocaleString("en-US", { maximumFractionDigits: digits });
 }
 
+function dataSourceBadge(source) {
+  if (source === "binance_ws") return `<span class="livebadge live-on">🔴 Live</span>`;
+  return `<span class="livebadge live-off">Polling</span>`;
+}
+
 function rowHtml(item) {
   if (item.status !== "ok") {
-    return `<tr><td>${escapeHtml(item.name)} (${escapeHtml(item.code)})</td><td colspan="11" style="color:#8b93a7">Data tidak tersedia</td></tr>`;
+    return `<tr><td>${escapeHtml(item.name)} (${escapeHtml(item.code)})</td><td colspan="12" style="color:#8b93a7">Data tidak tersedia</td></tr>`;
   }
   const chgClass = item.change_pct >= 0 ? "pos" : "neg";
   const chgSign = item.change_pct >= 0 ? "+" : "";
   return `<tr>
     <td>${escapeHtml(item.name)} <span style="color:#8b93a7">(${escapeHtml(item.code)})</span></td>
+    <td>${dataSourceBadge(item.data_source)}</td>
     <td>${fmtNum(item.price, item.price < 10 ? 4 : 2)}</td>
     <td class="${chgClass}">${chgSign}${fmtNum(item.change_pct)}%</td>
     <td>${item.trend}</td>
@@ -71,7 +77,7 @@ function render() {
   const items = latestData.data[activeGroup] || [];
   tbody.innerHTML = items.length
     ? items.map(rowHtml).join("")
-    : `<tr><td colspan="12">Tidak ada data untuk grup ini.</td></tr>`;
+    : `<tr><td colspan="13">Tidak ada data untuk grup ini.</td></tr>`;
 }
 
 async function fetchAnalysis() {

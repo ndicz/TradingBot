@@ -90,6 +90,16 @@ th { color: var(--muted); font-weight: 600; }
 .sentiment-neutral { background: rgba(139,147,167,0.15); color: var(--muted); }
 .sentiment-none { color: var(--muted); }
 
+.livebadge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.live-on { background: rgba(46,204,113,0.15); color: var(--buy); }
+.live-off { background: rgba(139,147,167,0.15); color: var(--muted); }
+
 .disclaimer {
   color: var(--muted);
   font-size: 0.8rem;

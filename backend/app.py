@@ -19,7 +19,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from . import config, data_sources
+from . import binance_ws, config, data_sources
 from .analysis import analyze_instrument
 from .sentiment import combine_signal, score_headlines
 
@@ -60,12 +60,28 @@ def _refresh_crypto() -> list[dict]:
         log.exception("Failed to fetch top10 crypto list")
         return items
 
+    symbols = [coin["binance_symbol"] for coin in top10]
+    binance_ws.ensure_subscribed(symbols)
+
     for coin in top10:
-        df = data_sources.fetch_binance_klines(coin["binance_symbol"])
-        result = analyze_instrument(coin["name"], coin["binance_symbol"], df, "crypto")
+        symbol = coin["binance_symbol"]
+        df, source = _price_from_ws_or_rest(symbol)
+        result = analyze_instrument(coin["name"], symbol, df, "crypto", data_source=source)
         if result:
             items.append(result)
     return items
+
+
+def _price_from_ws_or_rest(symbol: str):
+    """Use the live WebSocket window only while the connection is actually
+    up. If the WS is down (e.g. its host is blocked on this network), a
+    once-seeded snapshot would otherwise sit stale forever — so fall
+    straight through to a fresh REST poll instead, same as before WS existed."""
+    if binance_ws.is_live(symbol):
+        df = binance_ws.get_klines(symbol)
+        if df is not None:
+            return df, "binance_ws"
+    return data_sources.fetch_binance_klines(symbol), "rest"
 
 
 def _refresh_lq45() -> list[dict]:
@@ -97,9 +113,24 @@ def _refresh_nasdaq() -> list[dict]:
 
 
 def _refresh_xau() -> list[dict]:
+    items = []
+
     symbol, df = data_sources.fetch_xau_klines()
-    result = analyze_instrument("Gold / USD", symbol or "XAUUSD", df, "xau")
-    return [result] if result else []
+    result = analyze_instrument("Gold / USD (Yahoo)", symbol or "XAUUSD", df, "xau")
+    if result:
+        items.append(result)
+
+    # PAXGUSDT (Pax Gold, a token backed 1:1 by physical gold) tracks spot
+    # XAUUSD closely and streams over the same Binance WebSocket used for
+    # crypto — a free realtime alternative to Yahoo's delayed GC=F/XAUUSD=X.
+    paxg_symbol = config.GOLD_PROXY_BINANCE_SYMBOL
+    binance_ws.ensure_subscribed([paxg_symbol])
+    paxg_df, source = _price_from_ws_or_rest(paxg_symbol)
+    paxg_result = analyze_instrument("Gold (PAXG realtime proxy)", paxg_symbol, paxg_df, "xau", data_source=source)
+    if paxg_result:
+        items.append(paxg_result)
+
+    return items
 
 
 def _refresh_all() -> None:
@@ -140,8 +171,17 @@ def _build_news_targets() -> list[tuple[str, str, str, str]]:
             targets.append(("crypto", item["code"], item["name"], data_sources.crypto_to_yahoo_symbol(item["code"])))
     for group in ("lq45", "us100", "nasdaq", "xau"):
         for item in groups.get(group, []):
-            if item.get("status") == "ok":
-                targets.append((group, item["code"], item["name"], item["code"]))
+            if item.get("status") != "ok":
+                continue
+            code = item["code"]
+            # The PAXGUSDT gold proxy is a Binance symbol, not a Yahoo one —
+            # convert it the same way crypto symbols are (e.g. PAXG-USD).
+            yahoo_symbol = (
+                data_sources.crypto_to_yahoo_symbol(code)
+                if code == config.GOLD_PROXY_BINANCE_SYMBOL
+                else code
+            )
+            targets.append((group, code, item["name"], yahoo_symbol))
     return targets
 
 

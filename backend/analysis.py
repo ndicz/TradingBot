@@ -75,7 +75,7 @@ def generate_signal(ind: dict) -> dict:
     }
 
 
-def analyze_instrument(name: str, code: str, df, group: str) -> dict | None:
+def analyze_instrument(name: str, code: str, df, group: str, data_source: str = "rest") -> dict | None:
     from .indicators import compute_indicators
 
     if df is None or len(df) < 15:
@@ -105,4 +105,5 @@ def analyze_instrument(name: str, code: str, df, group: str) -> dict | None:
         "confidence": sig["confidence"],
         "reasons": sig["reasons"],
         "last_candle_time": ind["last_candle_time"],
+        "data_source": data_source,
     }
