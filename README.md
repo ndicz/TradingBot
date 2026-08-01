@@ -16,14 +16,21 @@ Dashboard juga menampilkan **berita per instrumen**, di-refresh tiap 1 jam,
 diambil dari RSS feed per-simbol Yahoo Finance (gratis, tanpa API key) —
 berlaku untuk crypto, saham, index, maupun emas.
 
+Crypto dan emas (lewat proxy **PAXGUSDT**, token yang backed 1:1 fisik emas)
+di-stream **realtime lewat Binance WebSocket** — bukan polling REST tiap 5
+menit lagi. Kalau host WebSocket-nya tidak bisa diakses (jaringan/firewall
+tertentu), otomatis fallback ke REST polling seperti biasa; kolom "Data" di
+tabel menunjukkan mana yang 🔴 Live vs Polling.
+
 > Sinyal ini heuristik rule-based, bukan nasihat keuangan.
 
 ## Menjalankan
 
 Butuh akses internet ke `api.coingecko.com`, `query1.finance.yahoo.com`,
-`feeds.finance.yahoo.com`, dan Binance (`api.binance.com`, dengan fallback
-otomatis ke mirror publik `data-api.binance.vision` kalau host utama
-diblokir jaringan/geo-restricted).
+`feeds.finance.yahoo.com`, dan Binance — baik REST (`api.binance.com`,
+fallback ke mirror publik `data-api.binance.vision`) maupun WebSocket
+(`stream.binance.com:9443`, host terpisah dari REST, kadang diblokir
+jaringan meski REST-nya jalan — kalau begitu otomatis fallback ke polling).
 
 ```bash
 pip install -r requirements.txt
@@ -41,8 +48,10 @@ berita tiap 5 menit di frontend (backend refresh cache berita tiap 1 jam —
 backend/
   config.py       daftar instrumen & endpoint data source
   data_sources.py fetch OHLCV & news dari Binance / Yahoo Finance / CoinGecko
+  binance_ws.py   realtime kline streaming via Binance WebSocket (crypto + PAXGUSDT)
   indicators.py   perhitungan EMA, RSI, MACD, Bollinger, ATR, support/resistance
   analysis.py     gabungkan indikator jadi sinyal BUY/SELL/HOLD
+  sentiment.py    scoring sentimen berita + gabungan sinyal teknikal+news
   app.py          FastAPI app + background cache refresher (harga + berita) + API endpoint
 frontend/
   index.html, app.js, style.css   dashboard statis (vanilla JS)
