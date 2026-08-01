@@ -1,0 +1,3 @@
+# TradingBot
+
+Repo initialized.
