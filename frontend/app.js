@@ -31,6 +31,12 @@ function signalBadge(signal) {
   return `<span class="badge ${cls}">${signal}</span>`;
 }
 
+function sentimentBadge(sentiment) {
+  if (!sentiment) return `<span class="sentiment sentiment-none">-</span>`;
+  const labels = { positive: "Positif", negative: "Negatif", neutral: "Netral" };
+  return `<span class="sentiment sentiment-${sentiment}">${labels[sentiment] || sentiment}</span>`;
+}
+
 function fmtNum(n, digits = 2) {
   if (n === null || n === undefined) return "-";
   return Number(n).toLocaleString("en-US", { maximumFractionDigits: digits });
@@ -38,7 +44,7 @@ function fmtNum(n, digits = 2) {
 
 function rowHtml(item) {
   if (item.status !== "ok") {
-    return `<tr><td>${item.name} (${item.code})</td><td colspan="9" style="color:#8b93a7">Data tidak tersedia</td></tr>`;
+    return `<tr><td>${escapeHtml(item.name)} (${escapeHtml(item.code)})</td><td colspan="11" style="color:#8b93a7">Data tidak tersedia</td></tr>`;
   }
   const chgClass = item.change_pct >= 0 ? "pos" : "neg";
   const chgSign = item.change_pct >= 0 ? "+" : "";
@@ -52,6 +58,8 @@ function rowHtml(item) {
     <td>${fmtNum(item.resistance, item.resistance < 10 ? 4 : 2)}</td>
     <td>${signalBadge(item.signal)}</td>
     <td>${item.confidence}%</td>
+    <td>${sentimentBadge(item.news_sentiment)}</td>
+    <td>${signalBadge(item.combined_signal || item.signal)}</td>
     <td>${item.last_candle_time ? new Date(item.last_candle_time).toLocaleString() : "-"}</td>
   </tr>`;
 }
@@ -63,7 +71,7 @@ function render() {
   const items = latestData.data[activeGroup] || [];
   tbody.innerHTML = items.length
     ? items.map(rowHtml).join("")
-    : `<tr><td colspan="10">Tidak ada data untuk grup ini.</td></tr>`;
+    : `<tr><td colspan="12">Tidak ada data untuk grup ini.</td></tr>`;
 }
 
 async function fetchAnalysis() {
@@ -91,8 +99,9 @@ function newsCardHtml(entry) {
           ${n.published_at ? `<span class="news-time">${new Date(n.published_at).toLocaleString()}</span>` : ""}
         </li>`).join("")
     : `<li class="news-empty">Tidak ada berita.</li>`;
+  const sentiment = entry.sentiment ? sentimentBadge(entry.sentiment.sentiment) : "";
   return `<div class="news-card">
-    <h3>${escapeHtml(entry.name)} <span style="color:#8b93a7">(${escapeHtml(entry.code)})</span></h3>
+    <h3>${escapeHtml(entry.name)} <span style="color:#8b93a7">(${escapeHtml(entry.code)})</span> ${sentiment}</h3>
     <ul>${headlines}</ul>
   </div>`;
 }

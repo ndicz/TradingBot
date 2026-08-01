@@ -78,6 +78,18 @@ th { color: var(--muted); font-weight: 600; }
 .badge-sell { background: rgba(231,76,60,0.15); color: var(--sell); }
 .badge-hold { background: rgba(241,196,15,0.15); color: var(--hold); }
 
+.sentiment {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.sentiment-positive { background: rgba(46,204,113,0.15); color: var(--buy); }
+.sentiment-negative { background: rgba(231,76,60,0.15); color: var(--sell); }
+.sentiment-neutral { background: rgba(139,147,167,0.15); color: var(--muted); }
+.sentiment-none { color: var(--muted); }
+
 .disclaimer {
   color: var(--muted);
   font-size: 0.8rem;

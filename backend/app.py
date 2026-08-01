@@ -21,6 +21,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import config, data_sources
 from .analysis import analyze_instrument
+from .sentiment import combine_signal, score_headlines
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -141,11 +142,13 @@ def _refresh_news() -> None:
 
     grouped = {"crypto": [], "lq45": [], "nasdaq": [], "xau": []}
     for group, code, name, yahoo_symbol in targets:
+        items = fetched.get(yahoo_symbol) or []
         grouped[group].append({
             "code": code,
             "name": name,
             "yahoo_symbol": yahoo_symbol,
-            "items": fetched.get(yahoo_symbol) or [],
+            "items": items,
+            "sentiment": score_headlines(items),
         })
 
     with _news_lock:
@@ -179,16 +182,41 @@ def _on_startup() -> None:
     threading.Thread(target=_refresh_news_loop, daemon=True).start()
 
 
+def _news_sentiment_lookup() -> dict[tuple[str, str], dict]:
+    with _news_lock:
+        groups = _news_cache["groups"]
+    return {
+        (group, entry["code"]): entry["sentiment"]
+        for group, entries in groups.items()
+        for entry in entries
+    }
+
+
+def _enrich_with_news(group_name: str, items: list[dict], lookup: dict[tuple[str, str], dict]) -> list[dict]:
+    enriched = []
+    for item in items:
+        item = dict(item)
+        sentiment = lookup.get((group_name, item.get("code")))
+        if sentiment and item.get("status") == "ok":
+            item["news_sentiment"] = sentiment["sentiment"]
+            item["combined_signal"] = combine_signal(item["signal"], sentiment["sentiment"])
+        else:
+            item["news_sentiment"] = None
+            item["combined_signal"] = item.get("signal")
+        enriched.append(item)
+    return enriched
+
+
 @app.get("/api/analysis")
 def get_analysis(group: str = Query(default="all", pattern="^(all|crypto|lq45|nasdaq|xau)$")):
     with _cache_lock:
         status = _cache["status"]
         updated_at = _cache["updated_at"]
         groups = _cache["groups"]
-        if group == "all":
-            data = groups
-        else:
-            data = {group: groups.get(group, [])}
+        selected = groups if group == "all" else {group: groups.get(group, [])}
+
+    lookup = _news_sentiment_lookup()
+    data = {g: _enrich_with_news(g, items, lookup) for g, items in selected.items()}
     return {"status": status, "updated_at": updated_at, "timeframe": "M30", "data": data}
 
 
