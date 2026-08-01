@@ -16,6 +16,21 @@ LQ45_TICKERS = [
     "SRTG.JK", "TLKM.JK", "TOWR.JK", "UNTR.JK", "UNVR.JK",
 ]
 
+# Top 100 US large-cap stocks (S&P 100 basket) — a static snapshot; S&P
+# periodically rebalances constituents, so update occasionally.
+US100_TICKERS = [
+    "AAPL", "ABBV", "ABT", "ACN", "ADBE", "AIG", "AMD", "AMGN", "AMT", "AMZN",
+    "AVGO", "AXP", "BA", "BAC", "BK", "BKNG", "BLK", "BMY", "BRK-B", "C",
+    "CAT", "CHTR", "CL", "CMCSA", "COF", "COP", "COST", "CRM", "CSCO", "CVS",
+    "CVX", "DE", "DHR", "DIS", "DOW", "DUK", "EMR", "F", "FDX", "GD",
+    "GE", "GILD", "GM", "GOOG", "GOOGL", "GS", "HD", "HON", "IBM", "INTC",
+    "INTU", "JNJ", "JPM", "KO", "LIN", "LLY", "LMT", "LOW", "MA", "MCD",
+    "MDLZ", "MDT", "MET", "META", "MMM", "MO", "MRK", "MS", "MSFT", "NEE",
+    "NFLX", "NKE", "NVDA", "ORCL", "PEP", "PFE", "PG", "PM", "PYPL", "QCOM",
+    "RTX", "SBUX", "SCHW", "SO", "T", "TGT", "TJX", "TMO", "TMUS", "TSLA",
+    "TXN", "UNH", "UNP", "UPS", "USB", "V", "VZ", "WFC", "WMT", "XOM",
+]
+
 NASDAQ_SYMBOL = "^IXIC"  # NASDAQ Composite index
 
 # Gold vs USD — try spot symbol first, fall back to COMEX futures if unavailable.

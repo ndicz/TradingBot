@@ -2,9 +2,9 @@
 
 Endpoints:
   GET /api/analysis            -> all groups
-  GET /api/analysis?group=crypto|lq45|nasdaq|xau
+  GET /api/analysis?group=crypto|lq45|us100|nasdaq|xau
   GET /api/news                -> per-instrument headlines, refreshed hourly
-  GET /api/news?group=crypto|lq45|nasdaq|xau
+  GET /api/news?group=crypto|lq45|us100|nasdaq|xau
   GET /                        -> dashboard (static frontend)
 """
 
@@ -34,18 +34,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+GROUPS = ["crypto", "lq45", "us100", "nasdaq", "xau"]
+_GROUP_PATTERN = "^(all|" + "|".join(GROUPS) + ")$"
+
 _cache_lock = threading.Lock()
 _cache = {
     "status": "loading",
     "updated_at": None,
-    "groups": {"crypto": [], "lq45": [], "nasdaq": [], "xau": []},
+    "groups": {g: [] for g in GROUPS},
 }
 
 _news_lock = threading.Lock()
 _news_cache = {
     "status": "loading",
     "updated_at": None,
-    "groups": {"crypto": [], "lq45": [], "nasdaq": [], "xau": []},
+    "groups": {g: [] for g in GROUPS},
 }
 
 
@@ -76,6 +79,17 @@ def _refresh_lq45() -> list[dict]:
     return items
 
 
+def _refresh_us100() -> list[dict]:
+    items = []
+    fetched = data_sources.fetch_many_yahoo(config.US100_TICKERS)
+    for ticker in config.US100_TICKERS:
+        df = fetched.get(ticker)
+        result = analyze_instrument(ticker, ticker, df, "us100")
+        if result:
+            items.append(result)
+    return items
+
+
 def _refresh_nasdaq() -> list[dict]:
     df = data_sources.fetch_yahoo_klines(config.NASDAQ_SYMBOL)
     result = analyze_instrument("NASDAQ Composite", config.NASDAQ_SYMBOL, df, "nasdaq")
@@ -93,6 +107,7 @@ def _refresh_all() -> None:
     groups = {
         "crypto": _refresh_crypto(),
         "lq45": _refresh_lq45(),
+        "us100": _refresh_us100(),
         "nasdaq": _refresh_nasdaq(),
         "xau": _refresh_xau(),
     }
@@ -123,15 +138,10 @@ def _build_news_targets() -> list[tuple[str, str, str, str]]:
     for item in groups.get("crypto", []):
         if item.get("status") == "ok":
             targets.append(("crypto", item["code"], item["name"], data_sources.crypto_to_yahoo_symbol(item["code"])))
-    for item in groups.get("lq45", []):
-        if item.get("status") == "ok":
-            targets.append(("lq45", item["code"], item["name"], item["code"]))
-    for item in groups.get("nasdaq", []):
-        if item.get("status") == "ok":
-            targets.append(("nasdaq", item["code"], item["name"], item["code"]))
-    for item in groups.get("xau", []):
-        if item.get("status") == "ok":
-            targets.append(("xau", item["code"], item["name"], item["code"]))
+    for group in ("lq45", "us100", "nasdaq", "xau"):
+        for item in groups.get(group, []):
+            if item.get("status") == "ok":
+                targets.append((group, item["code"], item["name"], item["code"]))
     return targets
 
 
@@ -140,7 +150,7 @@ def _refresh_news() -> None:
     targets = _build_news_targets()
     fetched = data_sources.fetch_many_news([t[3] for t in targets])
 
-    grouped = {"crypto": [], "lq45": [], "nasdaq": [], "xau": []}
+    grouped = {g: [] for g in GROUPS}
     for group, code, name, yahoo_symbol in targets:
         items = fetched.get(yahoo_symbol) or []
         grouped[group].append({
@@ -208,7 +218,7 @@ def _enrich_with_news(group_name: str, items: list[dict], lookup: dict[tuple[str
 
 
 @app.get("/api/analysis")
-def get_analysis(group: str = Query(default="all", pattern="^(all|crypto|lq45|nasdaq|xau)$")):
+def get_analysis(group: str = Query(default="all", pattern=_GROUP_PATTERN)):
     with _cache_lock:
         status = _cache["status"]
         updated_at = _cache["updated_at"]
@@ -221,7 +231,7 @@ def get_analysis(group: str = Query(default="all", pattern="^(all|crypto|lq45|na
 
 
 @app.get("/api/news")
-def get_news(group: str = Query(default="all", pattern="^(all|crypto|lq45|nasdaq|xau)$")):
+def get_news(group: str = Query(default="all", pattern=_GROUP_PATTERN)):
     with _news_lock:
         status = _news_cache["status"]
         updated_at = _news_cache["updated_at"]

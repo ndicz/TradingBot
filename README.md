@@ -4,6 +4,7 @@ Dashboard web yang menampilkan analisa teknikal timeframe M30 (30 menit) untuk:
 
 - **Top 10 Crypto** (by market cap, non-stablecoin) — data dari Binance, ranking dari CoinGecko
 - **LQ45 Saham** (45 saham IDX) — data dari Yahoo Finance
+- **Top 100 US Stocks** (basket S&P 100, saham cap besar NYSE/NASDAQ) — data dari Yahoo Finance
 - **NASDAQ Composite** (`^IXIC`) — data dari Yahoo Finance
 - **XAUUSD** (emas vs USD, fallback ke futures `GC=F`) — data dari Yahoo Finance
 
@@ -49,10 +50,11 @@ frontend/
 
 ## Catatan
 
-- Daftar LQ45 di `backend/config.py` adalah snapshot statis — IDX merevisi
-  konstituen LQ45 dua kali setahun (Feb & Agu), jadi perlu di-update berkala.
+- Daftar LQ45 dan Top 100 US Stocks di `backend/config.py` adalah snapshot
+  statis — IDX (Feb & Agu) dan S&P (berkala) merevisi konstituennya, jadi
+  perlu di-update sesekali.
 - Cakupan berita untuk saham LQ45 yang lebih kecil/kurang liputan bahasa
   Inggris bisa kosong — itu keterbatasan sumber (Yahoo Finance RSS bahasa
   Inggris), bukan bug.
-- Endpoint API: `GET /api/analysis?group=all|crypto|lq45|nasdaq|xau`,
-  `GET /api/news?group=all|crypto|lq45|nasdaq|xau`
+- Endpoint API: `GET /api/analysis?group=all|crypto|lq45|us100|nasdaq|xau`,
+  `GET /api/news?group=all|crypto|lq45|us100|nasdaq|xau`
