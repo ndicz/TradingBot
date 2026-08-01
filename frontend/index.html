@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TradingBot — Analisa M30</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Analisa M30</h1>
+  <div id="status" class="status">Memuat...</div>
+</header>
+
+<nav id="tabs">
+  <button data-group="crypto" class="tab active">Top 10 Crypto</button>
+  <button data-group="lq45" class="tab">LQ45 Saham</button>
+  <button data-group="nasdaq" class="tab">NASDAQ</button>
+  <button data-group="xau" class="tab">XAUUSD</button>
+</nav>
+
+<main>
+  <table id="table">
+    <thead>
+      <tr>
+        <th>Instrumen</th>
+        <th>Harga</th>
+        <th>Chg %</th>
+        <th>Trend</th>
+        <th>RSI14</th>
+        <th>Support</th>
+        <th>Resistance</th>
+        <th>Sinyal</th>
+        <th>Confidence</th>
+        <th>Update Candle</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <tr><td colspan="10">Memuat data...</td></tr>
+    </tbody>
+  </table>
+  <p class="disclaimer">
+    Sinyal dihasilkan otomatis dari indikator teknikal (EMA, RSI, MACD, Bollinger Bands) pada timeframe M30.
+    Ini bukan nasihat keuangan — gunakan sebagai referensi tambahan, bukan satu-satunya dasar keputusan trading.
+  </p>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

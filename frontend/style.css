@@ -1,0 +1,86 @@
+:root {
+  --bg: #0f1420;
+  --panel: #161d2e;
+  --border: #2a3348;
+  --text: #e6e9f2;
+  --muted: #8b93a7;
+  --buy: #2ecc71;
+  --sell: #e74c3c;
+  --hold: #f1c40f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 { font-size: 1.25rem; margin: 0; }
+
+.status { color: var(--muted); font-size: 0.85rem; }
+
+nav#tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.tab {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.tab.active { background: #2c5ce6; border-color: #2c5ce6; }
+
+main { padding: 16px 24px; overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+th, td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+th { color: var(--muted); font-weight: 600; }
+
+.pos { color: var(--buy); }
+.neg { color: var(--sell); }
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.badge-buy { background: rgba(46,204,113,0.15); color: var(--buy); }
+.badge-sell { background: rgba(231,76,60,0.15); color: var(--sell); }
+.badge-hold { background: rgba(241,196,15,0.15); color: var(--hold); }
+
+.disclaimer {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 20px;
+  max-width: 700px;
+}
